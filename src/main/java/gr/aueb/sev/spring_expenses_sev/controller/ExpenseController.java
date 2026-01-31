@@ -8,6 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/expenses")
+@CrossOrigin(origins = "*")
 public class ExpenseController {
 
     private final ExpenseRepo repository;
@@ -24,5 +25,10 @@ public class ExpenseController {
     @PostMapping
     public Expense saveExpense(@RequestBody Expense expense) {
         return repository.save(expense);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteExpense(@PathVariable Long id) {
+        repository.deleteById(id);
     }
 }

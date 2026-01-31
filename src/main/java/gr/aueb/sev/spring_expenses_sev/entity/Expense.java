@@ -15,8 +15,8 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String description;
-    private Double amount;
-    private String category;
-    private LocalDate date;
+    private String description; //Περιγραφή του προϊόντος
+    private Double amount;      // Ποσό του προϊόντος
+    private String category;    // Σε τι κατηγορία μπορεί να τοποθετηθεί το προϊόν
+    private LocalDate date;     // Πότε προστέθηκε το προϊόν
 }
