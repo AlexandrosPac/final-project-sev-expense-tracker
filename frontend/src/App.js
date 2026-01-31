@@ -61,7 +61,7 @@ function App() {
 
       <h1>Tracker for Expenses</h1>
 
-     //Συνολική Φόρμα
+
         <div style={{ background: "#FBF4D9", padding: "20px", marginBottom: "20px", borderRadius: "8px" }}>
             <h3>Προσθέστε το έξοδο σας!</h3>
                 <form onSubmit={handleSubmit}>
@@ -86,7 +86,7 @@ function App() {
              style={{ marginRight: "10px", width: "80px" }}
            />
 
-           //Dropdown για τις Κατηγορίες
+
            <select name="category" value={form.category} onChange={handleChange} style={{ marginRight: "10px" }}>
              <option value="Φαγητό">Φαγητό</option>
              <option value="Μεταφορά">Μεταφορά</option>
@@ -107,7 +107,7 @@ function App() {
              </form>
            </div>
 
-            //Η Λίστα
+
             <ul>
               {expenses.map(exp => (
               <li key={exp.id || Math.random()}
@@ -117,7 +117,7 @@ function App() {
                 alignItems: "center"
                 }}>
 
-               //Delete button
+
                 <button
                   onClick={() => handleDelete(exp.id)}
                   style={{
