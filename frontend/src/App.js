@@ -22,6 +22,8 @@ function App() {
    });
   };
 
+  const totalAmount = expenses.reduce((acc, item) => acc + Number(item.amount), 0);
+
   //Φτιάχνω το στυλ που μου αρέσει για την σελίδα
   const StyleAlex = {
     padding: "20px",
@@ -138,6 +140,12 @@ function App() {
               </li>
              ))}
             </ul>
+
+            <hr />
+                  <div style={{ marginTop: "20px", fontSize: "1.5em", fontWeight: "bold", color: "black" }}>
+                    Συνολικό Ποσό Εξόδων: {totalAmount.toFixed(2)}€
+                  </div>
+
         </div>
         );
       }
