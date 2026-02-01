@@ -4,6 +4,7 @@ import './App.css';
 function App() {
     const [expenses, setExpenses] = useState([]); //Δηλώνω μεταβλητές
     const [errorMessage, setErrorMessage] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
 
     const [form, setForm] = useState({   //Δημιουργία μια φόρμας που τα πεδία τα τοποθετεί ο κάθε χρήστης
         description: '',
@@ -55,7 +56,7 @@ function App() {
 
     };
     const handleDelete = (id) => {
-        // Εμφανίζει παράθυρο διαλόγου Ναι/Όχι
+        // Εμφανίζει ένα παράθυρο διαλόγου Ναι/Όχι
         if (window.confirm("Είστε σίγουρος για την διαγραφή του εξόδου σας;")) {
 
           fetch(`http://localhost:8080/expenses/${id}`, {
@@ -80,120 +81,103 @@ function App() {
         }
       };
 
-    //Φτιάχνω το στυλ που μου αρέσει για την σελίδα
-    const StyleAlex = {
-        padding: "20px",
-        backgroundColor: "#585123",                     // Το χρώμα του pastel red. Το red έβγαινε πολύ κόκκινο και δεν μου ήταν καλό έτσι όπως το έβλεπα στην σελίδα.
-        fontFamily: "Arial, sans-serif"
-    };
+return (
+     <div className="app-container">
 
+       <h1 className="app-title">Tracker for Expenses</h1>
 
+         <div className="form-container">
+             <h3>Προσθέστε το έξοδο σας!</h3>
 
-  return (
+             <form onSubmit={handleSubmit} className="form-layout">
 
-    <div style={StyleAlex}>
+                <input
+                  type="text"
+                  name="description"
+                  placeholder="Περιγραφή (π.χ. Ψώνια)"
+                  className="form-input"
+                  value={form.description}
+                  onChange={handleChange}
+                />
 
-      <h1 style={{ textAlign: "center", color: "white" }} >Tracker for Expenses</h1>
+                <input
+                  type="number"
+                  name="amount"
+                  placeholder="Ποσό (€)"
+                  className="form-input input-amount"
+                  value={form.amount}
+                  onChange={handleChange}
+                />
 
+                <div className="dropdown-container">
 
-        <div style={{ background: "#a9b3ce", padding: "20px", marginBottom: "20px", borderRadius: "8px" }}>
-            <h3>Προσθέστε το έξοδο σας!</h3>
-                <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                <div
+                    className="dropdown-header"
+                    onClick={() => setIsOpen(!isOpen)} // Όταν πατάς, ανοίγει/κλείνει
+                  >
+                    {form.category} {/* Δείχνει την τρέχουσα επιλογή */}
+                    <span className={`arrow ${isOpen ? "up" : "down"}`}>▼</span>
+                </div>
 
-           <input
-             type="text"
-             name="description"
-             placeholder="Περιγραφή (π.χ. Ψώνια)"
-             value={form.description}
-             onChange={handleChange}
-             style={{ marginRight: "10px" }}
-           />
+                {isOpen && (
+                    <ul className="dropdown-list">
+                      {["Φαγητό", "Μεταφορά", "Διασκέδαση", "Καθημερινά", "Άλλο"].map((option) => (
+                        <li
+                          key={option}
+                          className="dropdown-item"
+                          onClick={() => {
+                            setForm({ ...form, category: option });
+                            setIsOpen(false);
+                          }}
+                        >{option}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
 
-           <input
-             type="number"
-             name="amount"
-             placeholder="Ποσό (€)"
-             value={form.amount}
-             onChange={handleChange}
-             style={{ marginRight: "10px", width: "80px" }}
-           />
+                <input
+                  type="date"
+                  name="date"
+                  className="form-input"
+                  value={form.date}
+                  onChange={handleChange}
+                />
 
-
-           <select name="category" value={form.category} onChange={handleChange} style={{ marginRight: "10px" }}>
-             <option value="Φαγητό">Φαγητό</option>
-             <option value="Μεταφορά">Μεταφορά</option>
-             <option value="Διασκέδαση">Διασκέδαση</option>
-             <option value="Καθημερινά">Καθημερινά</option>
-             <option value="Άλλο">Άλλο</option>
-           </select>
-
-           <input
-             type="date"
-             name="date"
-             value={form.date}
-             onChange={handleChange}
-             style={{ marginRight: "10px" }}
-           />
-
-               <button type="submit">Προσθήκη</button>
+                <button type="submit" className="add-button">Προσθήκη</button>
              </form>
 
-           {errorMessage && (
-                <div style={{
-                    color: "white",
-                    marginTop: "10px",
-                    fontWeight: "bold",
-                    backgroundColor: "#880d1e",
-                    padding: "10px",
-                    borderRadius: "4px",
-                    textAlign: "center" }}>
-                {errorMessage}
-                </div>
-           )}
-           </div>
+            {errorMessage && (
+                 <div className="error-message">
+                     {errorMessage}
+                 </div>
+            )}
+            </div>
 
+             <ul className="expense-list">
+               {expenses.map(exp => (
+               <li key={exp.id || Math.random()}
+                   className="expense-item"
+                   style={{ backgroundColor: getCategoryColor(exp.category) }}
+               >
+                 <button
+                   onClick={() => handleDelete(exp.id)}
+                   className="delete-btn"
+                 >x
+                 </button>
+                    <span>
+                     <strong>{exp.category}</strong>: {exp.description} - {exp.amount}€ <small>({exp.date})</small>
+                    </span>
+               </li>
+              ))}
+             </ul>
 
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {expenses.map(exp => (
-              <li key={exp.id || Math.random()}
-                style={{
-                backgroundColor: getCategoryColor(exp.category),
-                marginBottom: "10px",
-                padding: "15px",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center"
-                }}>
+             <div className="total-amount">
+                 Συνολικό Ποσό Εξόδων: {totalAmount.toFixed(2)}€
+             </div>
 
+     </div>
+   );
+ }
 
-                <button
-                  onClick={() => handleDelete(exp.id)}
-                  style={{
-                  background: "red",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "25px",
-                  height: "25px",
-                  cursor: "pointer",
-                  marginRight: "10px",
-                  fontWeight: "bold"
-                  }}>X
-                </button>
-                   <span>
-                    <strong>{exp.category}</strong>: {exp.description} - {exp.amount}€ <small>({exp.date})</small>
-                   </span>
-              </li>
-             ))}
-            </ul>
-
-            <hr />
-                  <div style={{ marginTop: "20px", fontSize: "1.5em", fontWeight: "bold", color: "white" }}>
-                    Συνολικό Ποσό Εξόδων: {totalAmount.toFixed(2)}€
-                  </div>
-
-        </div>
-        );
-      }
-
-export default App;
+ export default App;
