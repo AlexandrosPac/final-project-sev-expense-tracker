@@ -69,6 +69,10 @@
 | **POST** | `/expenses` | Δημιουργία νέου εξόδου |
 | **DELETE** | `/expenses/{id}` | Διαγραφή εξόδου με βάση το ID |
 
+## 📸 Screenshots
+<img width="1864" height="476" alt="image" src="https://github.com/user-attachments/assets/54a65640-1402-4f83-bd5b-f40603845f34" />
+
+
 ---
 ## 📝 Σημαντικές Σημειώσεις Υλοποίησης
 1. **Model-First Approach:** Η δομή της βάσης δεδομένων παράγεται αυτόματα από τον κώδικα Java (`@Entity`), 
