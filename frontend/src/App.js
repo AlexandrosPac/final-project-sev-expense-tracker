@@ -2,71 +2,103 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [expenses, setExpenses] = useState([]); //Δηλώνω μεταβλητές
+    const [expenses, setExpenses] = useState([]); //Δηλώνω μεταβλητές
+    const [errorMessage, setErrorMessage] = useState('');
 
-  const [form, setForm] = useState({   //Δημιουργία μια φόρμας που τα πεδία τα τοποθετεί ο κάθε χρήστης
-      description: '',
-      amount: '',
-      category: 'Φαγητό',
-      date: new Date().toISOString().split('T')[0]
+    const [form, setForm] = useState({   //Δημιουργία μια φόρμας που τα πεδία τα τοποθετεί ο κάθε χρήστης
+        description: '',
+        amount: '',
+        category: 'Φαγητό',
+        date: new Date().toISOString().split('T')[0]
     });
 
 
-  const handleDelete = (id) => {
-   //Προσθέτω και ένα delete button στα έξοδα
-   fetch(`http://localhost:8080/expenses/${id}`, {
-   method: 'DELETE'
-   })
-   .then(() => {
-   setExpenses(expenses.filter(exp => exp.id !== id));
-   });
-  };
+    useEffect(() => {
+        fetch('http://localhost:8080/expenses')
+        .then(response => response.json())
+        .then(data => setExpenses(data));
+    }, []);
 
-  const totalAmount = expenses.reduce((acc, item) => acc + Number(item.amount), 0);
+    const handleChange = (e) => {
+        setErrorMessage('');
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
 
-  //Φτιάχνω το στυλ που μου αρέσει για την σελίδα
-  const StyleAlex = {
-    padding: "20px",
-    backgroundColor: "#86B47B", // Το χρώμα του pastel red. Το red έβγαινε πολύ κόκκινο και δεν μου ήταν καλό έτσι όπως το έβλεπα στην σελίδα.
-    fontFamily: "Arial, sans-serif"
-  };
+    const handleSubmit = (e) => {
+            e.preventDefault();
+            if (!form.description.trim() || !form.amount || Number(form.amount) <= 0) {
+                  setErrorMessage("Παρακαλώ συμπληρώστε σωστά την περιγραφή και το ποσό!");
+                  return;
+            }
 
-  useEffect(() => {
-    fetch('http://localhost:8080/expenses')
-      .then(response => response.json())
-      .then(data => setExpenses(data));
-  }, []);
+            setErrorMessage('');
 
-  const handleChange = (e) => {
-      setForm({ ...form, [e.target.name]: e.target.value });
-  };
+            fetch('http://localhost:8080/expenses', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(form)
+            })
+            .then(res => {
+                if (!res.ok) {
+                        throw new Error("Κάτι πήγε λάθος με την αποθήκευση");
+                        }
+                        return res.json();
+                })
+                .then(newExpense => {
+                    setExpenses([...expenses, newExpense]);
+                    setForm({ ...form, description: '', amount: '' , category: 'Φαγητό'});
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    setErrorMessage("Υπάρχει πρόβλημα σύνδεσης με τον Server!");
+                });
 
-  const handleSubmit = (e) => {
-      e.preventDefault();
+    };
+    const handleDelete = (id) => {
+        // Εμφανίζει παράθυρο διαλόγου Ναι/Όχι
+        if (window.confirm("Είστε σίγουρος για την διαγραφή του εξόδου σας;")) {
 
-      fetch('http://localhost:8080/expenses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
-      })
-      .then(res => res.json())
-      .then(newExpense => {
-        setExpenses([...expenses, newExpense]);
-        setForm({ ...form, description: '', amount: '' });
-      });
-  };
+          fetch(`http://localhost:8080/expenses/${id}`, {
+            method: 'DELETE'
+          })
+          .then(() => {
+            setExpenses(expenses.filter(exp => exp.id !== id));
+          });
+        }
+      };
+
+    const totalAmount = expenses.reduce((acc, item) => acc + Number(item.amount), 0);
+
+    const getCategoryColor = (category) => {
+        switch(category) {
+          case 'Φαγητό': return '#ffadad';              // Απαλό Κόκκινο
+          case 'Μεταφορά': return '#ffd6a5';            // Απαλό Πορτοκαλί
+          case 'Διασκέδαση': return '#fdffb6';          // Απαλό Κίτρινο
+          case 'Καθημερινά': return '#9bf6ff';          // Απαλό Γαλάζιο
+          case 'Άλλο': return '#bdb2ff';                // Απαλό Μωβ
+          default: return '#e0e0e0';                    // Γκρι (Ασφάλεια)
+        }
+      };
+
+    //Φτιάχνω το στυλ που μου αρέσει για την σελίδα
+    const StyleAlex = {
+        padding: "20px",
+        backgroundColor: "#585123",                     // Το χρώμα του pastel red. Το red έβγαινε πολύ κόκκινο και δεν μου ήταν καλό έτσι όπως το έβλεπα στην σελίδα.
+        fontFamily: "Arial, sans-serif"
+    };
+
 
 
   return (
 
     <div style={StyleAlex}>
 
-      <h1>Tracker for Expenses</h1>
+      <h1 style={{ textAlign: "center", color: "white" }} >Tracker for Expenses</h1>
 
 
-        <div style={{ background: "#FBF4D9", padding: "20px", marginBottom: "20px", borderRadius: "8px" }}>
+        <div style={{ background: "#a9b3ce", padding: "20px", marginBottom: "20px", borderRadius: "8px" }}>
             <h3>Προσθέστε το έξοδο σας!</h3>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
 
            <input
              type="text"
@@ -74,7 +106,6 @@ function App() {
              placeholder="Περιγραφή (π.χ. Ψώνια)"
              value={form.description}
              onChange={handleChange}
-             required
              style={{ marginRight: "10px" }}
            />
 
@@ -84,7 +115,6 @@ function App() {
              placeholder="Ποσό (€)"
              value={form.amount}
              onChange={handleChange}
-             required
              style={{ marginRight: "10px", width: "80px" }}
            />
 
@@ -95,7 +125,7 @@ function App() {
              <option value="Διασκέδαση">Διασκέδαση</option>
              <option value="Καθημερινά">Καθημερινά</option>
              <option value="Άλλο">Άλλο</option>
-                </select>
+           </select>
 
            <input
              type="date"
@@ -107,14 +137,30 @@ function App() {
 
                <button type="submit">Προσθήκη</button>
              </form>
+
+           {errorMessage && (
+                <div style={{
+                    color: "white",
+                    marginTop: "10px",
+                    fontWeight: "bold",
+                    backgroundColor: "#880d1e",
+                    padding: "10px",
+                    borderRadius: "4px",
+                    textAlign: "center" }}>
+                {errorMessage}
+                </div>
+           )}
            </div>
 
 
-            <ul>
+            <ul style={{ listStyle: "none", padding: 0 }}>
               {expenses.map(exp => (
               <li key={exp.id || Math.random()}
                 style={{
+                backgroundColor: getCategoryColor(exp.category),
                 marginBottom: "10px",
+                padding: "15px",
+                borderRadius: "8px",
                 display: "flex",
                 alignItems: "center"
                 }}>
@@ -142,7 +188,7 @@ function App() {
             </ul>
 
             <hr />
-                  <div style={{ marginTop: "20px", fontSize: "1.5em", fontWeight: "bold", color: "black" }}>
+                  <div style={{ marginTop: "20px", fontSize: "1.5em", fontWeight: "bold", color: "white" }}>
                     Συνολικό Ποσό Εξόδων: {totalAmount.toFixed(2)}€
                   </div>
 
